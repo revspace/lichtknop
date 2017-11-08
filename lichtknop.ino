@@ -6,7 +6,7 @@ const int knopje_pin = 3;
 const int lichtstate_pin = 4;
 const int led_pin = 13;
 
-void ignore_input (ms) {
+void ignore_input (unsigned long ms) {
   unsigned long target = millis() + ms;
   while (millis() - target >= 0) digitalWrite(led_pin, millis() % 200 < 100);
 }
