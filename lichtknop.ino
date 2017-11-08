@@ -1,7 +1,28 @@
+/*
+                                                   coll.
+             }  +  o---+---\/\/\------------+     +-------- spacestate_pin
+             }         |                    |    /
+  spacestate }         +---\/\/\--->|---+   V ⇉ K
+             }                          |   |    \ em.
+             }  -  o--------------------+---+     +--- GND
+
+             }     o---+----------------------------------- knopje_pin
+             }         |
+  knopje     }         : |-
+             }         |
+             }     o---+--- GND
+
+             }  +  o--------------------------------------- lichtstate_pin
+             }         |
+  licht-SSR  }         +---\/\/\--->|---+
+             }                          |   
+             }  -  o--------------------+--- GND
+*/
+
 bool spacestate = false;
 bool lichtstate = false;
 
-const int spacestate_pin = 2;
+const int spacestate_pin = 8;
 const int knopje_pin = 3;
 const int lichtstate_pin = 4;
 const int led_pin = 13;
