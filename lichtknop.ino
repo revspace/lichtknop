@@ -4,6 +4,12 @@ bool lichtstate = false;
 const int spacestate_pin = 2;
 const int knopje_pin = 3;
 const int lichtstate_pin = 4;
+const int led_pin = 13;
+
+void ignore_input (ms) {
+  unsigned long target = millis() + ms;
+  while (millis() - target >= 0) digitalWrite(led_pin, millis() % 200 < 100);
+}
 
 void setup() {
   pinMode(spacestate_pin, INPUT_PULLUP);
@@ -15,15 +21,17 @@ void setup() {
 }
 
 void loop() {
-  if(!digitalRead(spacestate_pin) != spacestate) {
-    spacestate = !spacestate;
-    lichtstate = spacestate;
-    digitalWrite(lichtstate_pin, lichtstate);
-  }
+  digitalWrite(led_pin, millis() % 1000 < 500);
 
-  if(digitalRead(knopje_pin) == LOW) {
-    lichtstate = !lichtstate; 
+  bool spaceinput = !digitalRead(spacestate_pin);
+  if(spaceinput != spacestate) {
+    lichtstate = spacestate = spaceinput;
     digitalWrite(lichtstate_pin, lichtstate);
-    delay(1000);
+    ignore_input(1000);
+  }
+  else if(digitalRead(knopje_pin) == LOW) {
+    lichtstate = !lichtstate;
+    digitalWrite(lichtstate_pin, lichtstate);
+    ignore_input(1000);
   }
 }
