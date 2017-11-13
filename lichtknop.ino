@@ -12,7 +12,7 @@
              }         |
              }     o---+--- GND
 
-             }  +  o--------------------------------------- lichtstate_pin
+             }  +  o---+----------------------------------- lichtstate_pin
              }         |
   licht-SSR  }         +---\/\/\--->|---+
              }                          |   
@@ -31,14 +31,14 @@ const int led_pin = 13;
 
 void ignore_input (unsigned long ms) {
   unsigned long start = millis();
-  while ((long) millis() - start < ms) {
+  while (millis() - start < ms) {
     digitalWrite(led_pin, millis() % 200 < 100);
   }
 }
 
 bool read_knopje() {
   unsigned long start = millis();
-  while ((long) millis() - start < 20) {
+  while (millis() - start < 20) {
     if (digitalRead(knopje_pin)) {
       return false;
     }
