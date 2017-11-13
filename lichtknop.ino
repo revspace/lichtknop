@@ -51,9 +51,10 @@ void setup() {
   pinMode(spacestate_pin, INPUT_PULLUP);
   pinMode(knopje_pin, INPUT_PULLUP);
   pinMode(lichtstate_pin, OUTPUT);
-  spacestate = digitalRead(spacestate_pin);
+  spacestate = LOW;
   lichtstate = spacestate;
   digitalWrite(lichtstate_pin, lichtstate);
+  ignore_input(1000);
 }
 
 void loop() {
