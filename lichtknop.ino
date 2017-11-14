@@ -32,18 +32,24 @@ const int led_pin = 13;
 void ignore_input (unsigned long ms) {
   unsigned long start = millis();
   while (millis() - start < ms) {
-    digitalWrite(led_pin, millis() % 200 < 100);
+    digitalWrite(led_pin, millis() % 100 < 50);
   }
 }
 
 bool read_knopje() {
+  static bool previous = false;
   unsigned long start = millis();
+
+  bool current;
+
   while (millis() - start < 20) {
-    if (digitalRead(knopje_pin)) {
+    current = !digitalRead(knopje_pin);
+    if (current == previous) {
+      // button bounced or unchanged; ignore input
       return false;
     }
   }
-  return true;
+  return previous = current;
 }
 
 void setup() {
