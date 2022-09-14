@@ -17,6 +17,8 @@ boolean reconnect();
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 #define LIGHTS_OUT_DURATION 25000
 #define RELAY_PIN D2
+#define LIGHTSTATE_L_PIN D5
+#define LIGHTSTATE_R_PIN D6
 
 // WiFi settings
 char ssid[] = "revspace-pub-2.4ghz";    //    your network SSID (name)
@@ -29,14 +31,18 @@ WiFiClient espClient;
 PubSubClient client(mqtt_server, 1883, onMqttMessage, espClient);
 long lastReconnectAttempt = 0;
 
+int8_t lights_l = -1;
+int8_t lights_r = -1;
+
 void setup() {
     WiFi.mode(WIFI_STA);
     Serial.begin(115200);
     Serial.println();
     Serial.println(ESP.getChipId());
     pinMode(RELAY_PIN, OUTPUT);
-    pinMode(D4, OUTPUT);
-    // pinMode(D0, OUTPUT);
+    pinMode(LIGHTSTATE_L_PIN, INPUT_PULLUP);
+    pinMode(LIGHTSTATE_R_PIN, INPUT_PULLUP);
+
 
     Serial.print("Connecting to ");
     Serial.print(ssid);
@@ -56,10 +62,7 @@ void setup() {
 }
 
 boolean reconnect() {
-    if (client.connect("Ledspace")) {
-        // Once connected, publish an announcement...
-        client.publish("f0x/tubes/01", "online");
-        // ... and resubscribe
+    if (client.connect("lightstate")) {
         client.subscribe("revspace/button/nomz");
         client.loop();
     }
@@ -78,11 +81,32 @@ void onMqttMessage(char* topic, byte * payload, unsigned int length) {
         digitalWrite(RELAY_PIN, HIGH);
         Serial.println("Turning off lights due to nomz");
 
+        delay(100); // make sure the lights are fully turned off
+        checkLights(); // before checking and publishing that the light just turned off
+
         delay(LIGHTS_OUT_DURATION);
 
         digitalWrite(RELAY_PIN, LOW);
         Serial.println("Turning lights back on");
     }
+}
+
+void checkLights() {
+        if (lights_l != digitalRead(LIGHTSTATE_L_PIN)) {
+            lights_l = !lights_l;
+            client.publish("revspace/lightstate/hoofdruimte_tv", lights_l ? "off" : "on");
+            Serial.print("Lights L turned ");
+            Serial.println(lights_l ? "off" : "on");
+            delay(50);
+        }
+
+        if (lights_r != digitalRead(LIGHTSTATE_R_PIN)) {
+            lights_r = !lights_r;
+            client.publish("revspace/lightstate/hoofdruimte_bar", lights_r ? "off" : "on");
+            Serial.print("Lights R turned ");
+            Serial.println(lights_r ? "off" : "on");
+            delay(50);
+        }
 }
 
 void loop() {
@@ -98,8 +122,9 @@ void loop() {
     } else {
         // Client connected
         client.loop();
+
+
+        checkLights();
     }
 
-    digitalWrite(D4, millis() % 1000 > 500);
-    // digitalWrite(D0, millis() % 1000 <= 500);
 }
