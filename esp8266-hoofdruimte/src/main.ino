@@ -54,8 +54,7 @@ void setup() {
     }
     Serial.println("");
 
-    Serial.print("WiFi connected");
-    Serial.println(ssid);
+    Serial.println("WiFi connected");
 
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
@@ -84,7 +83,7 @@ void onMqttMessage(char* topic, byte * payload, unsigned int length) {
         delay(100); // make sure the lights are fully turned off
         checkLights(); // before checking and publishing that the light just turned off
 
-        delay(LIGHTS_OUT_DURATION);
+        delay(LIGHTS_OUT_DURATION - 100);
 
         digitalWrite(RELAY_PIN, LOW);
         Serial.println("Turning lights back on");
@@ -92,21 +91,21 @@ void onMqttMessage(char* topic, byte * payload, unsigned int length) {
 }
 
 void checkLights() {
-        if (lights_l != digitalRead(LIGHTSTATE_L_PIN)) {
-            lights_l = !lights_l;
-            client.publish("revspace/lightstate/hoofdruimte_tv", lights_l ? "off" : "on");
-            Serial.print("Lights L turned ");
-            Serial.println(lights_l ? "off" : "on");
-            delay(50);
-        }
+    if (lights_l != digitalRead(LIGHTSTATE_L_PIN)) {
+        lights_l = digitalRead(LIGHTSTATE_L_PIN);
+        client.publish("revspace/lightstate/hoofdruimte_tv", lights_l ? "off" : "on", true);
+        Serial.print("Lights L turned ");
+        Serial.println(lights_l ? "off" : "on");
+        delay(50);
+    }
 
-        if (lights_r != digitalRead(LIGHTSTATE_R_PIN)) {
-            lights_r = !lights_r;
-            client.publish("revspace/lightstate/hoofdruimte_bar", lights_r ? "off" : "on");
-            Serial.print("Lights R turned ");
-            Serial.println(lights_r ? "off" : "on");
-            delay(50);
-        }
+    if (lights_r != digitalRead(LIGHTSTATE_R_PIN)) {
+        lights_r = digitalRead(LIGHTSTATE_R_PIN);
+        client.publish("revspace/lightstate/hoofdruimte_bar", lights_r ? "off" : "on", true);
+        Serial.print("Lights R turned ");
+        Serial.println(lights_r ? "off" : "on");
+        delay(50);
+    }
 }
 
 void loop() {

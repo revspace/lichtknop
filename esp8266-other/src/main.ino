@@ -51,8 +51,9 @@ void setup() {
 }
 
 boolean reconnect() {
-    if (client.connect("lightstate-" ROOM, NULL, NULL, "revspace/lightstate/" ROOM, 0, false, "off")) {
-        client.publish("revspace/lightstate/" ROOM, "on");
+    client.setKeepAlive(5);
+    if (client.connect("lightstate-" ROOM, NULL, NULL, "revspace/lightstate/" ROOM, 0, true, "off")) {
+        client.publish("revspace/lightstate/" ROOM, "on", true);
         client.loop();
     }
     return client.connected();
