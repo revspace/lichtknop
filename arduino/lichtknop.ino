@@ -69,9 +69,17 @@ void loop() {
 
   bool spaceinput = !digitalRead(spacestate_pin);
   if(spaceinput != spacestate) {
+
+    // kan afgedwongen flank zijn
+    delay(50);
+    spaceinput = !digitalRead(spacestate_pin);
+
+    bool old_lichtstate = lichtstate;
     lichtstate = spacestate = spaceinput;
-    digitalWrite(lichtstate_pin, lichtstate);
-    ignore_input(1000);
+    if (lichtstate != old_lichtstate) {
+      digitalWrite(lichtstate_pin, lichtstate);
+      ignore_input(1000);
+    }
   }
   else if(read_knopje()) {
     lichtstate = !lichtstate;
