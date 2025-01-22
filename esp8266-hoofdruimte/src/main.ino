@@ -9,7 +9,10 @@
 #include <WiFiUdp.h>
 #include <WiFiClient.h>
 
-#include <PubSubClient.h> //https://github.com/knolleary/pubsubclient/releases/tag/2.4
+#include <PubSubClient.h> //https://github.com/knolleary/pubsubclient/
+
+#include "../../config.h"
+#define HOSTNAME "lightstate-hoofdruimte"
 
 void onMqttMessage(char* topic, byte * payload, unsigned int length);
 boolean reconnect();
@@ -20,12 +23,8 @@ boolean reconnect();
 #define LIGHTSTATE_R_PIN D1
 #define LIGHTSTATE_R_TOPIC "revspace/lightstate/hoofdruimte_bar/set"
 
-// WiFi settings
-char ssid[] = "revspace-pub-2.4ghz";    //    your network SSID (name)
-char pass[] = "";             // your network password
-
 // MQTT Server settings and preparations
-const char* mqtt_server = "10.42.42.1";
+const char* mqtt_server = "mosquitto.space.revspace.nl";
 WiFiClient espClient;
 
 PubSubClient client(mqtt_server, 1883, onMqttMessage, espClient);
@@ -56,8 +55,10 @@ void setup() {
 
 
     Serial.print("Connecting to ");
-    Serial.print(ssid);
-    WiFi.begin(ssid, pass);
+    Serial.print(WIFI_SSID);
+
+    WiFi.hostname(HOSTNAME);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(50);
@@ -70,11 +71,14 @@ void setup() {
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
+    Serial.print("Hostname and MQTT id: ");
+    Serial.println(HOSTNAME);
+
     reconnect();
 }
 
 boolean reconnect() {
-    if (client.connect("lightstate-hoofdruimte")) {
+    if (client.connect(HOSTNAME)) {
         client.subscribe(LIGHTSTATE_L_TOPIC);
         client.subscribe(LIGHTSTATE_R_TOPIC);
         client.loop();

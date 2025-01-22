@@ -9,13 +9,11 @@
 #include <WiFiUdp.h>
 #include <WiFiClient.h>
 
-#include <PubSubClient.h> // https://github.com/knolleary/pubsubclient/releases/tag/2.4
+#include <PubSubClient.h> // https://github.com/knolleary/pubsubclient
+
+#include "../../config.h"
 
 boolean reconnect();
-
-// WiFi settings
-char ssid[] = "revspace-pub-2.4ghz";    //    your network SSID (name)
-char pass[] = "";             // your network password
 
 // MQTT Server settings and preparations
 const char* mqtt_server = "mosquitto.space.revspace.nl";
@@ -32,8 +30,10 @@ void setup() {
 
 
     Serial.print("Connecting to ");
-    Serial.print(ssid);
-    WiFi.begin(ssid, pass);
+    Serial.print(WIFI_SSID);
+    
+    WiFi.hostname("lightstate-" ROOM);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(50);
@@ -46,14 +46,20 @@ void setup() {
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
-    Serial.print("MQTT name: ");
+    Serial.print("Hostname and MQTT id: ");
     Serial.println("lightstate-" ROOM);
+
+    reconnect();
 }
 
 boolean reconnect() {
     client.setKeepAlive(5);
     if (client.connect("lightstate-" ROOM, NULL, NULL, "revspace/lightstate/" ROOM, 0, true, "off")) {
-        client.publish("revspace/lightstate/" ROOM, "on", true);
+        if (client.publish("revspace/lightstate/" ROOM, "on", true)) {
+            Serial.println("publish succesful, yay!");
+        } else {
+            Serial.println("publish failed :(");
+        }
         client.loop();
     }
     return client.connected();
